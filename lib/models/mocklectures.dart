@@ -26,7 +26,13 @@ class _AssignmentsState extends State<Assignments> {
         title: Text('Scheduled live lectures'),
       ),
       body: Center(
-        child: Text('Live lectures here'),
+        child: Text(
+          'Live lectures scheduling not available yet',
+          style: TextStyle(
+            fontSize: 18,
+            fontFamily: 'Comfortaa',
+          ),
+        ),
       ),
     );
   }

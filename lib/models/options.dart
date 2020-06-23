@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:students_kesbv/models/assignments.dart';
 import 'package:students_kesbv/models/chatforum.dart';
@@ -7,7 +8,11 @@ import 'package:students_kesbv/models/notices.dart';
 
 class Options extends StatefulWidget {
   final String grnumber;
-  Options({@required this.grnumber});
+  final FirebaseUser user;
+  Options({
+    @required this.grnumber,
+    this.user,
+  });
   @override
   _OptionsState createState() => _OptionsState(grnumber: grnumber);
 }
@@ -25,7 +30,7 @@ class _OptionsState extends State<Options> {
   ];
 
   TextStyle aboutStyle = TextStyle(
-      fontFamily: 'Arsenal',
+      fontFamily: 'Metropolis',
       fontSize: 26,
       fontWeight: FontWeight.bold,
       color: Colors.black);
@@ -188,7 +193,7 @@ class _OptionsState extends State<Options> {
               Navigator.push(
                 context,
                 new MaterialPageRoute(
-                  builder: (context)=>ChatForum(),
+                  builder: (context) => ChatForum(),
                 ),
               );
             },

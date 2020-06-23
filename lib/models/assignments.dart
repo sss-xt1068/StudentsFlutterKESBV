@@ -64,12 +64,13 @@ class _AssgnState extends State<Assgn> {
                               );
                             }
                             return ListView.builder(
-                              // itemExtent: 80,
+                              itemExtent: 100,
                               itemCount: snapshot.data.documents.length,
                               itemBuilder: (context, index) => _showLectures(
-                                  context,
-                                  snapshot.data.documents[index],
-                                  studentStandard),
+                                context,
+                                snapshot.data.documents[index],
+                                // studentStandard,
+                              ),
                             );
                           },
                         ),
@@ -90,51 +91,52 @@ class _AssgnState extends State<Assgn> {
   }
 
   Widget _showLectures(
-      BuildContext context, DocumentSnapshot doc, int studentStandard) {
+    BuildContext context,
+    DocumentSnapshot doc,
+    // int studentStandard,
+  ) {
     return GestureDetector(
-      child: studentStandard == doc['standard']
-          ? Container(
-              // alignment: Alignment.center,
-              padding: EdgeInsets.only(top: 6, bottom: 6),
-              margin: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                  color: Colors.amber[200],
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.orangeAccent,
-                        blurRadius: 5,
-                        spreadRadius: 2,
-                        offset: Offset(2, 3))
-                  ]),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(height: 5),
-                  Text(
-                    doc['subject'],
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.black,
-                    ),
-                  ),
-                  SizedBox(height: 5),
-                  Text(
-                    'Faculty: ' +
-                        doc['faculty'] +
-                        '\t\t\t\tStandard: ' +
-                        doc['standard'].toString(),
-                    style: TextStyle(fontSize: 16, color: Colors.black87),
-                  ),
-                  SizedBox(height: 10),
-                ],
+      // child: studentStandard == doc['standard']
+      // ?
+      child: Container(
+        // alignment: Alignment.center,
+        padding: EdgeInsets.only(top: 6, bottom: 6),
+        margin: EdgeInsets.all(12),
+        decoration: BoxDecoration(
+            color: Colors.amber[200],
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                  color: Colors.orangeAccent,
+                  blurRadius: 5,
+                  spreadRadius: 2,
+                  offset: Offset(2, 3))
+            ]),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(height: 5),
+            Text(
+              doc['subject'],
+              style: TextStyle(
+                fontSize: 20,
+                color: Colors.black,
               ),
-            )
-          : SizedBox(
-              height: 1,
-              // child: Text(''),
             ),
+            SizedBox(height: 5),
+            Text(
+              'Faculty: ' +
+                  doc['faculty'] +
+                  '\t\t\t\tStandard: ' +
+                  doc['standard'].toString(),
+              style: TextStyle(fontSize: 16, color: Colors.black87),
+            ),
+            SizedBox(height: 10),
+          ],
+        ),
+      ),
+      // : SizedBox(height: 1),
       onTap: () {
         showDialog(
           context: context,

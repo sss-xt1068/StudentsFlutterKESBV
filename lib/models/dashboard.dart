@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import './options.dart';
 import '../services/authentication.dart';
@@ -10,22 +11,29 @@ class Dashboard extends StatefulWidget {
     this.logoutCallback,
     this.userEmail,
     this.gr,
+    this.user,
   });
   final BaseAuth auth;
   final Function logoutCallback;
   final String userId;
   final String userEmail;
   final String gr;
+  final FirebaseUser user;
 
   @override
   _DashboardState createState() =>
-      _DashboardState(userEmail: userEmail, grno: gr);
+      _DashboardState(userEmail: userEmail, grno: gr, user: user);
 }
 
 class _DashboardState extends State<Dashboard> {
-  _DashboardState({@required this.userEmail, @required this.grno});
+  _DashboardState({
+    @required this.userEmail,
+    @required this.grno,
+    this.user,
+  });
   final String userEmail;
   final String grno;
+  final FirebaseUser user;
 
   signOut() async {
     try {
@@ -42,7 +50,11 @@ class _DashboardState extends State<Dashboard> {
       body: CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
-            title: Text('Student Dashboard'),
+            title: Text(
+              'Student Dashboard',
+              style: TextStyle(fontFamily: 'Metropolis'),
+            ),
+            expandedHeight: 100,
             actions: <Widget>[
               Transform.rotate(
                 angle: 3.1415,
@@ -60,7 +72,7 @@ class _DashboardState extends State<Dashboard> {
           SliverList(
             delegate: SliverChildListDelegate([
               Container(
-                height: 800,
+                height: 700,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                       colors: [Colors.orange[200], Colors.lightBlue[300]],
@@ -68,8 +80,30 @@ class _DashboardState extends State<Dashboard> {
                 ),
                 child: Column(
                   children: <Widget>[
-                    // Text(userEmail),
-                    Options(grnumber: grno),
+                    SizedBox(height: 25),
+                    Text(
+                      'Welcome!',
+                      style: TextStyle(
+                        fontFamily: 'Metropolis',
+                        fontSize: 26,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Divider(
+                      height: 20,
+                      thickness: 8,
+                      color: Colors.blue[700],
+                      indent: 40,
+                      endIndent: 40,
+                    ),
+                    Text(
+                      'Your email ID is: ' + userEmail,
+                      style: TextStyle(
+                        fontFamily: 'Comfortaa',
+                        fontSize: 14,
+                      ),
+                    ),
+                    Options(grnumber: grno, user: user),
                   ],
                 ),
               ),

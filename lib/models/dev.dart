@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -7,7 +8,19 @@ class Developer extends StatefulWidget {
 }
 
 class _DeveloperState extends State<Developer> {
-  List<TextStyle> devstyles = [TextStyle(fontSize: 16)];
+  TextEditingController messageController = TextEditingController();
+  List<TextStyle> devstyles = [
+    TextStyle(
+      fontSize: 20,
+      fontFamily: 'Comfortaa',
+      fontWeight: FontWeight.bold,
+    ),
+    TextStyle(
+      fontSize: 14,
+      fontFamily: 'Comfortaa',
+      fontWeight: FontWeight.bold,
+    )
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -27,12 +40,9 @@ class _DeveloperState extends State<Developer> {
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            // alignment: WrapAlignment.center,
-            // runSpacing: 20,
-            // direction: Axis.horizontal,
             children: <Widget>[
-              Text('Developed by Sanket Sahasrabudhe\n', style: devstyles[0]),
-              Text('Batch of 2015\n\n', style: devstyles[0]),
+              // Text('Developed by Sanket Sahasrabudhe\n', style: devstyles[0]),
+              // Text('Batch of 2015\n\n', style: devstyles[0]),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
@@ -52,6 +62,73 @@ class _DeveloperState extends State<Developer> {
                 size: 100,
                 colors: Colors.blue,
               ),
+              SizedBox(height: 70),
+              GestureDetector(
+                child: Container(
+                  padding: EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[50],
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: Text(
+                    'Something you didn\'t like?\nWant to message the developer?',
+                    textAlign: TextAlign.center,
+                    style: devstyles[1],
+                  ),
+                ),
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    child: AlertDialog(
+                      title: Text('Type a message here'),
+                      titlePadding: EdgeInsets.all(20),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Container(
+                            height: 100,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Container(
+                                  height: 100,
+                                  child: TextField(
+                                    maxLines: 3,
+                                    controller: messageController,
+                                    decoration: InputDecoration(
+                                      hintText: 'Your message',
+                                      disabledBorder: InputBorder.none,
+                                      enabledBorder: InputBorder.none,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // SimpleDialogOption(),
+                        ],
+                      ),
+                      actions: <Widget>[
+                        FlatButton(
+                          onPressed: () {
+                            print('Sorry, cool');
+                            Navigator.of(context).pop();
+                          },
+                          child: Text('No'),
+                        ),
+                        FlatButton(
+                            onPressed: () async {
+                              print('Sending your message boii');
+                              await addToMessage(messageController.text.trim());
+                              messageController.text = "";
+                              Navigator.of(context).pop();
+                            },
+                            child: Text('Yes'))
+                      ],
+                    ),
+                  );
+                },
+              )
             ],
           ),
         ),
@@ -59,7 +136,7 @@ class _DeveloperState extends State<Developer> {
       bottomSheet: GestureDetector(
         child: Container(
           alignment: Alignment.center,
-          height: 20,
+          height: 25,
           width: double.infinity,
           child: Text(
             'All icon assets by icons8.com',
@@ -71,9 +148,21 @@ class _DeveloperState extends State<Developer> {
     );
   }
 
-  open() async {
+  Future<void> addToMessage(String m) async {
+    var ref = Firestore.instance;
+    var doc = ref.collection('messages').document();
+    try {
+      doc.setData({'message': m});
+      // return true;
+    } catch (e) {
+      print(e);
+      // return false;
+    }
+  }
+
+  void open() async {
     if (await canLaunch('https://icons8.com')) {
-      launch('https://icons8.com');
+      await launch('https://icons8.com');
     }
   }
 }

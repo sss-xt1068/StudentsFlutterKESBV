@@ -34,7 +34,7 @@ class _NoticesState extends State<Notices> {
           ),
           child: SingleChildScrollView(
             child: Container(
-              height: 800,
+              height: 600,
               child: Column(
                 children: <Widget>[
                   Flexible(
@@ -52,7 +52,18 @@ class _NoticesState extends State<Notices> {
                                 context, snap.data.documents[index]));
                       },
                     ),
-                  )
+                  ),
+                  Container(
+                    height: 40,
+                    alignment: Alignment.center,
+                    child: Text('These notices are not raised by school authorities'),
+                  ),
+                  Container(
+                    height: 30,
+                    alignment: Alignment.center,
+                    child: Text('These are only for testing purposes.'),
+                  ),
+                  SizedBox(height: 40,)
                 ],
               ),
             ),

@@ -211,6 +211,7 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
   Widget _showForm() {
     return new Container(
       padding: EdgeInsets.all(16.0),
+      color: Colors.lightBlue[50],
       child: new Form(
         key: _formKey,
         child: new ListView(
@@ -249,11 +250,14 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
 
   Widget showLogo() {
     return Padding(
-        padding: const EdgeInsets.all(30),
+      padding: const EdgeInsets.all(30),
+      child: ClipOval(
         child: Image.asset(
           'assets/school1.jpg',
-          fit: BoxFit.fill,
-        ));
+          fit: BoxFit.cover,
+        ),
+      ),
+    );
   }
 
   Widget showEmailInput() {
@@ -264,8 +268,13 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
       alignment: Alignment.center,
       padding: EdgeInsets.only(left: 20, right: 20),
       decoration: BoxDecoration(
-          gradient:
-              LinearGradient(colors: [Colors.amber[100], Colors.amber[300]]),
+          gradient: LinearGradient(
+            colors: [Colors.amber[100], Colors.amber[300]],
+          ),
+          boxShadow: [
+            BoxShadow(
+                blurRadius: 4, color: Colors.grey[600], offset: Offset(3, 5))
+          ],
           borderRadius: BorderRadius.circular(20)),
       child: new TextFormField(
         textAlign: TextAlign.center,
@@ -298,7 +307,11 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
       decoration: BoxDecoration(
           gradient:
               LinearGradient(colors: [Colors.amber[100], Colors.amber[300]]),
-          borderRadius: BorderRadius.circular(20)),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+                blurRadius: 4, color: Colors.grey[600], offset: Offset(3, 5))
+          ]),
       child: new TextFormField(
         textAlign: TextAlign.center,
         maxLines: 1,
@@ -327,9 +340,14 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
       padding: EdgeInsets.only(left: 20, right: 20),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-          gradient:
-              LinearGradient(colors: [Colors.amber[100], Colors.amber[300]]),
-          borderRadius: BorderRadius.circular(20)),
+        gradient:
+            LinearGradient(colors: [Colors.amber[100], Colors.amber[300]]),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+              blurRadius: 4, color: Colors.grey[600], offset: Offset(3, 5))
+        ],
+      ),
       child: new TextFormField(
         textAlign: TextAlign.center,
         keyboardType: TextInputType.number,

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:students_kesbv/models/newuser.dart';
 import '../pages/login_signup_page.dart';
@@ -30,6 +31,7 @@ class _RootPageState extends State<RootPage> {
   String _userId = "";
   String _userEmail = '';
   String _grno = '';
+  FirebaseUser localUser;
 
   @override
   void initState() {
@@ -56,6 +58,7 @@ class _RootPageState extends State<RootPage> {
           authStatus = user?.uid == null
               ? AuthStatus.NOT_LOGGED_IN
               : AuthStatus.LOGGED_IN;
+          localUser = user;
         });
       }
     });
@@ -174,6 +177,7 @@ class _RootPageState extends State<RootPage> {
           return new Dashboard(
             gr: _grno,
             userId: _userId,
+            user: localUser,
             auth: widget.auth,
             logoutCallback: logoutCallback,
             userEmail: _userEmail,
