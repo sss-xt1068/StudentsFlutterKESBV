@@ -1,16 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../services/authentication.dart';
-import 'package:path_provider/path_provider.dart';
 import 'dart:core';
-import 'dart:io';
+import 'dart:async';
 
 class NewUser extends StatefulWidget {
-  NewUser({Key key, this.auth, this.loginCallback, this.userId, this.email});
+  NewUser(
+      {Key key,
+      this.auth,
+      this.loginCallback,
+      this.userId,
+      this.email,
+      this.user});
   final BaseAuth auth;
   final VoidCallback loginCallback;
   final String userId;
   final String email;
+  final FirebaseUser user;
 
   @override
   _NewUserState createState() => _NewUserState(initEmail: email);
@@ -26,41 +33,52 @@ class _NewUserState extends State<NewUser> {
   String mm = '';
   String yy = '';
   String gr = '';
+  String tempGR;
   String batch = '';
   String _errorMessage = '';
   bool _isProcessing = false;
-  int standard;
+  List dates;
+  DateTime dob;
   TextEditingController grController = TextEditingController();
 
   @override
   void initState() {
     // read grnumber from file with name email
-    readMyGR();
+    // _isProcessing = true;
     super.initState();
+    Future.delayed(Duration(seconds: 10), loadGR);
+    print('Am I executing first??');
   }
 
-  // double _percentFilled = 0.0;
+  void loadGR() {
+    readMyGR().then((value) {
+      setState(() {
+        gr = value;
+      });
+      print('Loaded gr to=>' + gr);
+    });
+  }
+
+  Future<String> readMyGR() async {
+    print(initEmail);
+    String ret;
+    // Future.delayed(Duration(seconds: 10), () async {
+    var document = await Firestore.instance
+        .collection('email_gr_maps')
+        .document(initEmail)
+        .get();
+    if (document.data['status'] == true) {
+      print('Just can\'t do it');
+    } else
+      ret = document.data['gr'];
+    // });
+    print('God help me, I\'m sending my gr=>' + ret);
+    return ret;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   backgroundColor: Colors.purple,
-      //   title: Text('Create Profile'),
-      //   actions: <Widget>[
-      //     Transform.rotate(
-      //       angle: -3.14,
-      //       child: IconButton(
-      //         icon: new Icon(
-      //           Icons.exit_to_app,
-      //           color: Colors.white,
-      //           size: 30,
-      //         ),
-      //         onPressed: signOut,
-      //       ),
-      //     )
-      //   ],
-      // ),
       body: SafeArea(
         child: Stack(
           children: [
@@ -79,28 +97,27 @@ class _NewUserState extends State<NewUser> {
         gradient: LinearGradient(colors: [
           Colors.white,
           Colors.white,
-          // Colors.blueAccent[100],
-          Colors.blue[400],
-        ], begin: Alignment.topCenter),
+          Color.fromRGBO(87, 42, 250, 0.8),
+        ], begin: Alignment.topLeft),
       ),
       child: SingleChildScrollView(
         child: Container(
-          height: 1350,
+          height: 1000,
           child: Column(
             children: [
-              SizedBox(height: 30),
+              SizedBox(height: 10),
               headTag(),
               showImage(),
-              tagOne(),
+              // tagOne(),
               Flexible(flex: 4, child: fnameField()),
               Flexible(flex: 4, child: mnameField()),
               Flexible(flex: 4, child: lnameField()),
-              Flexible(flex: 4, child: dobField()),
+              Flexible(flex: 5, child: dobField()),
               Flexible(flex: 2, child: errorDisplay()),
-              Flexible(flex: 5, child: standardField()),
-              tagTwo(),
-              Flexible(flex: 5, child: emailField()),
-              Flexible(flex: 5, child: grField()),
+              Flexible(flex: 3, child: standardField()),
+              // tagTwo(),
+              Flexible(flex: 5, child: genderField()),
+              // Flexible(flex: 5, child: grField()),
               submitButton()
             ],
           ),
@@ -272,40 +289,29 @@ class _NewUserState extends State<NewUser> {
           boxShadow: [
             BoxShadow(color: Colors.grey, blurRadius: 4, offset: Offset(3, 5))
           ]),
-      padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
-      margin: EdgeInsets.fromLTRB(20, 15, 20, 10),
-      child: TextFormField(
-        // textCapitalization: TextCapitalization.words,
-        keyboardType: TextInputType.phone,
-        textAlign: TextAlign.left,
-        decoration: InputDecoration(
-          icon: Icon(Icons.date_range),
-          enabledBorder: InputBorder.none,
-          hintText: 'DOB (dd/mm/yyyy)',
-          alignLabelWithHint: true,
+      margin: EdgeInsets.all(20),
+      alignment: Alignment.center,
+      child: ListTile(
+        leading: Icon(Icons.calendar_today),
+        title: Text(
+          dob == null
+              ? 'Select Date of Birth'
+              : 'DOB: ' + dob.toString().substring(0, 10),
+          style: TextStyle(fontSize: 16, color: Colors.black54),
         ),
-        onChanged: (val) {
-          List dates = val.split('/');
-          dd = dates[0];
-          mm = dates[1];
-          yy = dates[2];
-          print(dd + '/' + mm + '/' + yy);
-          if ((mm.trim().length != 2) ||
-              (int.parse(mm) > 12) ||
-              (dd.trim().length != 2) ||
-              (int.parse(dd) > 31) ||
-              (yy.trim().length != 4) ||
-              (int.parse(yy) < 2000)) {
+        onTap: () {
+          print('Gotta give my dob?');
+          showDatePicker(
+            context: context,
+            initialDate: DateTime(2019),
+            firstDate: DateTime(2000),
+            lastDate: DateTime(DateTime.now().year),
+          ).then((value) {
             setState(() {
-              _errorMessage =
-                  'Incorrect DoB format. Please enter in the mentioned format';
-              print(_errorMessage);
+              dob = value;
             });
-          } else {
-            setState(() {
-              _errorMessage = '';
-            });
-          }
+            print(dob.toString());
+          });
         },
       ),
     );
@@ -315,14 +321,15 @@ class _NewUserState extends State<NewUser> {
     return Container(
       child: Text(
         _errorMessage,
-        style: TextStyle(color: Colors.red, fontSize: 14),
+        style: TextStyle(color: Colors.black87, fontSize: 14),
       ),
     );
   }
 
+  String standardValue = '10';
+
   Widget standardField() {
     return Container(
-      alignment: Alignment.bottomCenter,
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           gradient: LinearGradient(colors: [
@@ -332,32 +339,98 @@ class _NewUserState extends State<NewUser> {
           boxShadow: [
             BoxShadow(color: Colors.grey, blurRadius: 4, offset: Offset(3, 5))
           ]),
-      padding: EdgeInsets.only(left: 20, right: 20),
-      margin: EdgeInsets.fromLTRB(20, 10, 120, 20),
-      child: TextFormField(
-        maxLength: 2,
-        // textCapitalization: TextCapitalization.words,
-        textAlign: TextAlign.left,
-        keyboardType: TextInputType.number,
-        decoration: InputDecoration(
-          icon: Icon(Icons.looks_one),
-          enabledBorder: InputBorder.none,
-          hintText: 'Standard',
-          alignLabelWithHint: true,
-          suffixIcon: IconButton(
-              icon: Icon(Icons.help_outline),
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  child: AlertDialog(
-                    title: Text('Questions for filling standard?'),
-                    content: Text(
-                        'For standards other than 10, please enter only the digit. For e.g, 8 and not 08'),
-                  ),
-                );
-              }),
-        ),
-        onChanged: (val) => standard = int.parse(val.trim()),
+      alignment: Alignment.center,
+      // color: Colors.blue[50],
+      margin: EdgeInsets.only(left: 20, right: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Choose standard',
+            style: TextStyle(
+              color: Colors.black87,
+              fontSize: 16,
+            ),
+          ),
+          SizedBox(width: 50),
+          DropdownButton<String>(
+            value: standardValue,
+            style: TextStyle(
+                fontSize: 18,
+                fontFamily: 'Metropolis',
+                color: Colors.blue[600],
+                fontWeight: FontWeight.bold),
+            elevation: 15,
+            iconSize: 22,
+            icon: Icon(Icons.arrow_drop_down_circle),
+            items: <String>['7', '8', '9', '10']
+                .map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+            onChanged: (val) {
+              setState(() {
+                standardValue = val;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  String gender = 'M';
+  Widget genderField() {
+    return Container(
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(colors: [
+            Colors.lightBlue[100],
+            Colors.white,
+          ], begin: Alignment.topLeft),
+          boxShadow: [
+            BoxShadow(color: Colors.grey, blurRadius: 4, offset: Offset(3, 5))
+          ]),
+      alignment: Alignment.center,
+      // color: Colors.blue[50],
+      margin: EdgeInsets.all(20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Gender',
+            style: TextStyle(
+              color: Colors.black87,
+              fontSize: 16,
+            ),
+          ),
+          SizedBox(width: 50),
+          DropdownButton<String>(
+            value: gender,
+            style: TextStyle(
+                fontSize: 18,
+                fontFamily: 'Metropolis',
+                color: Colors.blue[600],
+                fontWeight: FontWeight.bold),
+            elevation: 15,
+            iconSize: 22,
+            icon: Icon(Icons.arrow_drop_down_circle),
+            items: <String>['F', 'M']
+                .map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+            onChanged: (val) {
+              setState(() {
+                gender = val;
+              });
+            },
+          ),
+        ],
       ),
     );
   }
@@ -425,41 +498,32 @@ class _NewUserState extends State<NewUser> {
       child: TextFormField(
         enabled: false,
         maxLines: 1,
-        controller: grController,
+        // controller: grController,
         textCapitalization: TextCapitalization.none,
         textAlign: TextAlign.left,
         keyboardType: TextInputType.number,
-        // initialValue: initGR,
+        // initialValue: readMyGR().then((value) => null),
+        initialValue: gr == '' ? 'Tap to refresh' : gr,
         decoration: InputDecoration(
           labelText: 'GR Number (autofilled)',
           icon: Icon(Icons.short_text),
           disabledBorder: InputBorder.none,
           alignLabelWithHint: true,
         ),
-        onChanged: (val) => lname = val.trim(),
+        // onChanged: (val) => lname = val.trim(),
       ),
     );
   }
 
-  void readMyGR() async {
-    var file = await _localFile(initEmail);
-    var contents = await file.readAsString();
-    List parts = contents.split('#');
-    print(parts[0] + '.....' + parts[1]);
-    setState(() {
-      grController.text = parts[0].toString().trim();
-    });
-  }
+  // Future<String> get _localPath async {
+  //   final directory = await getApplicationDocumentsDirectory();
+  //   return directory.path;
+  // }
 
-  Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
-
-  Future<File> _localFile(String filename) async {
-    final path = await _localPath;
-    return File('$path/$filename.txt');
-  }
+  // Future<File> _localFile(String filename) async {
+  //   final path = await _localPath;
+  //   return File('$path/$filename.txt');
+  // }
 
   Widget submitButton() {
     return Container(
@@ -502,40 +566,60 @@ class _NewUserState extends State<NewUser> {
                 _isProcessing = true;
               });
               try {
-                var ref = Firestore.instance;
-                var document = ref.collection('students');
-                document.document('GR_' + grController.text.trim()).setData({
-                  'fname': fname.trim(),
-                  'mname': mname.trim(),
-                  'lname': lname.trim(),
-                  'dob': '$dd/$mm/$yy'.trim(),
-                  'grnumber': grController.text.trim(),
-                });
-                document = ref.collection('gr_email_maps');
-                document
-                    .document(grController.text.trim())
-                    .setData({'email': initEmail});
-                print('Data written, now writing true to file');
-                var file = await _localFile(initEmail);
-                var result = await file.writeAsString('$gr#true');
-                print(result.path);
-                setState(() {
-                  _isProcessing = false;
-                });
-                Navigator.of(context).pop();
-                widget.loginCallback();
+                if (validateAll()) {
+                  var ref = Firestore.instance;
+                  var document = ref.collection('students');
+                  document.document('GR_' + gr.trim()).setData({
+                    'fname': fname,
+                    'mname': mname,
+                    'lname': lname,
+                    'dob': dob.toString().substring(0, 10),
+                    'grnumber': gr,
+                    'standard': int.parse(standardValue),
+                    'gender': gender == 'M' ? 'Male' : 'Female',
+                  });
+                  print('Student added boii :!!********************');
+                  document = ref.collection('email_gr_maps');
+                  document.document(initEmail).updateData({
+                    'status': true,
+                  });
+                  print('Changed status to true boii*********');
+                  document = ref.collection('gr_email_maps');
+                  document.document(gr).setData({
+                    'email': initEmail,
+                  });
+                  print('Added doc to gr_email_maps boi*******');
+
+                  // print('Data written, now writing true to email_gr_maps');
+                  setState(() {
+                    _isProcessing = false;
+                  });
+                  Navigator.of(context).pop();
+                  widget.loginCallback();
+                } else {
+                  setState(() {
+                    _isProcessing = false;
+                  });
+                  print('Na beta na');
+                  Navigator.of(context).pop();
+                }
               } catch (e) {
                 Navigator.of(context).pop();
-                showDialog(context: context,
-                child: AlertDialog(
-                  title:Text('Error occured'),
-                  content: Text(e.message),
-                  actions: <Widget>[
-                    FlatButton(onPressed: (){
-                      Navigator.of(context).pop();
-                    }, child: null)
-                  ],
-                ));
+                showDialog(
+                  context: context,
+                  child: AlertDialog(
+                    title: Text('Error occured'),
+                    content: Text(e.toString()),
+                    actions: <Widget>[
+                      FlatButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: null,
+                      )
+                    ],
+                  ),
+                );
               }
             },
             child: Text('Yes'),
@@ -543,5 +627,15 @@ class _NewUserState extends State<NewUser> {
         ],
       ),
     );
+  }
+
+  bool validateAll() {
+    if (fname.trim() == '' ||
+        mname.trim() == '' ||
+        lname.trim() == '' ||
+        dob == null) {
+      return false;
+    }
+    return true;
   }
 }

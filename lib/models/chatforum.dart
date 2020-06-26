@@ -73,8 +73,6 @@ class _ChatForumState extends State<ChatForum>
   ];
   bool _isLoading = false;
   var messageController = TextEditingController();
-  String _message = '';
-  String _curMessages = "none";
   List _curList = [''];
 
   @override

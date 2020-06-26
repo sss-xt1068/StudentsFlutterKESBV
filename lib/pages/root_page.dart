@@ -1,12 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:students_kesbv/models/newuser.dart';
 import '../pages/login_signup_page.dart';
 import '../services/authentication.dart';
 import '../models/dashboard.dart';
-import 'package:path_provider/path_provider.dart';
 import 'dart:core';
-import 'dart:io';
 
 enum AuthStatus {
   NOT_DETERMINED, //when there is an error
@@ -25,8 +24,6 @@ class RootPage extends StatefulWidget {
 }
 
 class _RootPageState extends State<RootPage> {
-
-  
   AuthStatus authStatus = AuthStatus.NOT_DETERMINED;
   String _userId = "";
   String _userEmail = '';
@@ -41,78 +38,69 @@ class _RootPageState extends State<RootPage> {
       if (user != null) {
         setState(() {
           _userEmail = user.email;
-        });
-      }
-      var curAuthStatus = await tryCheckStatus();
-      if (curAuthStatus == AuthStatus.IN_PROGRESS && user != null) {
-        setState(() {
-          authStatus = AuthStatus.IN_PROGRESS;
-        });
-      } else {
-        setState(() {
-          if (user != null) {
-            _userId = user?.uid;
-            _userEmail = user?.email;
-          }
-
-          authStatus = user?.uid == null
-              ? AuthStatus.NOT_LOGGED_IN
-              : AuthStatus.LOGGED_IN;
           localUser = user;
         });
       }
+      // var curAuthStatus = await
+      tryCheckStatus().then((status) {
+        print('Found the status boyss!! => ' + status.toString());
+        if (status == AuthStatus.IN_PROGRESS) {
+          setState(() {
+            authStatus = status;
+          });
+        } else {
+          if (authStatus == AuthStatus.IN_PROGRESS && user != null) {
+            setState(() {
+              authStatus = AuthStatus.IN_PROGRESS;
+              _userEmail = user.email;
+              print('In if case => ' + authStatus.toString());
+            });
+          } else {
+            setState(() {
+              if (user != null) {
+                _userId = user?.uid;
+                _userEmail = user?.email;
+              }
+
+              authStatus = user?.uid == null
+                  ? AuthStatus.NOT_LOGGED_IN
+                  : AuthStatus.LOGGED_IN;
+              localUser = user;
+              print('In else case => ' + authStatus.toString());
+            });
+          }
+        }
+      });
     });
   }
 
   Future<AuthStatus> tryCheckStatus() async {
-    try {
-      var inSignup = await readStatus();
-      if (inSignup != null) {
-        if (!inSignup) {
-          return AuthStatus.IN_PROGRESS;
-        }
+    AuthStatus curStatus;
+    // var ref = ;
+    if (localUser != null) {
+      var data = await Firestore.instance
+          .collection('email_gr_maps')
+          .document(_userEmail)
+          .get();
+      try {
+        if (data.exists) {
+          if (data.data['status'] == false) {
+            curStatus = AuthStatus.IN_PROGRESS;
+            print('I guess NOT TRUE');
+          } else {
+            curStatus = AuthStatus.LOGGED_IN;
+            print('Looks like you\'re IN');
+          }
+        } else
+          curStatus = null;
+      } catch (e) {
+        print(e);
+        curStatus = null;
       }
-      else
-      {
-        return null;
-      }
-    } catch (e) {
-      print(e);
+      return curStatus;
+    } else {
+      return null;
     }
-  }
-
-  Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
-
-  Future<File> get _localFile async {
-    final path = await _localPath;
-    return File('$path/$_userEmail.txt');
-  }
-
-  Future<bool> readStatus() async {
-    bool returnValue = false;
-    try {
-      final file = await _localFile;
-      // Read the file.
-      String contents = await file.readAsString();
-      print(contents);
-      List stats = contents.split('#');
-      if (stats[1] == 'false') {
-        returnValue = false;
-        print('You can\'t go ahead yet babe!');
-      } else {
-        returnValue = true;
-        print('Sure, come on in!!');
-      }
-      // return int.parse(contents);
-    } catch (e) {
-      // If encountering an error, return 0.
-      print('mmmmmmmmmmmmmmmmmmmNot found');
-      returnValue = null;
-    }
-    return returnValue;
   }
 
   void loginCallback() {
@@ -124,6 +112,7 @@ class _RootPageState extends State<RootPage> {
     });
     setState(() {
       authStatus = AuthStatus.LOGGED_IN;
+      print('Login callback mara =>' + authStatus.toString());
     });
   }
 
@@ -134,9 +123,11 @@ class _RootPageState extends State<RootPage> {
         _userEmail = user.email;
       });
     });
+    // writeToCollection();
     setState(() {
       // _grno = gr;
       authStatus = AuthStatus.IN_PROGRESS;
+      print('Signup callback mara =>' + authStatus.toString());
       // FULLY WORKING! YAY!
     });
   }
@@ -145,6 +136,7 @@ class _RootPageState extends State<RootPage> {
     setState(() {
       authStatus = AuthStatus.NOT_LOGGED_IN;
       _userId = "";
+      print('Log OUT callback mara =>' + authStatus.toString());
     });
   }
 
@@ -166,6 +158,7 @@ class _RootPageState extends State<RootPage> {
         return buildWaitingScreen();
         break;
       case AuthStatus.NOT_LOGGED_IN:
+        print('I\'m NOT_LOGGED_IN boyss :(((((');
         return new LoginSignupPage(
           auth: widget.auth,
           loginCallback: loginCallback,
@@ -174,6 +167,7 @@ class _RootPageState extends State<RootPage> {
         break;
       case AuthStatus.LOGGED_IN:
         if (_userId.length > 0 && _userId != null) {
+          print('I\'m LOGGED_IN boyss');
           return new Dashboard(
             gr: _grno,
             userId: _userId,
@@ -186,9 +180,11 @@ class _RootPageState extends State<RootPage> {
           return buildWaitingScreen();
         break;
       case AuthStatus.IN_PROGRESS:
+        print('I\'m still IN PROGRESS');
         return new NewUser(
           userId: _userId,
           auth: widget.auth,
+          user: localUser,
           // logoutCallback: logoutCallback,
           loginCallback: loginCallback,
           email: _userEmail,

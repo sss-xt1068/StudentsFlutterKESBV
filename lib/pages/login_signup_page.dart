@@ -1,9 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../services/authentication.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
-// import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginSignupPage extends StatefulWidget {
   LoginSignupPage({this.auth, this.loginCallback, this.signupCallback});
@@ -28,6 +25,15 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
   bool _isLoginForm;
   bool _isLoading;
 
+  @override
+  void initState() {
+    _errorMessage = "";
+    _isLoading = false;
+    _isLoginForm = true;
+    // fetch
+    super.initState();
+  }
+
   // Check if form is valid before perform login or signup
   bool validateAndSave() {
     final form = _formKey.currentState;
@@ -44,96 +50,86 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
       _errorMessage = "";
       _isLoading = true;
     });
-    if (validateAndSave()) {
-      String userId = "";
-      try {
-        if (_isLoginForm) {
-          // _tempmail = 'thebatfan1999@gmail.com';
-          // print(_email+_email.length.toString());
-          _tempmail = await getMail(_gr.trim());
-          // overriding email working
-          // now to get email from firestore collection
-          userId = await widget.auth.signIn(_tempmail, _password);
-          print('Signed in: $userId');
-        } else {
-          userId = await widget.auth.signUp(_email, _password);
-          // final snackbar = SnackBar(
-          //   content: Text('Signup complete! Logging in now!'),
-          // );
-          // Scaffold.of(context).showSnackBar(snackbar);
-          print('Signed up user: $userId');
-          userId = await widget.auth.signIn(_email, _password);
-          print('Signin done\n\nProceeding with GR:' +
-              _gr +
-              ' and email ' +
-              _email);
-          writeGR(_email, _gr);
-          print('email written to file successfully!');
-          //widget.auth.sendEmailVerification();
-          //_showVerifyEmailSentDialog();
-        }
-        setState(() {
-          _isLoading = false;
+    // if (validateAndSave()) {
+    String userId = "";
+    try {
+      print('Am i trying?');
+      if (_isLoginForm) {
+        _tempmail = await getMail(_gr.trim());
+        print('Signed in: $userId');
+        userId = await widget.auth.signIn(_tempmail, _password);
+        print('Signed in: $userId');
+      } else {
+        userId = await widget.auth.signUp(_email, _password);
+        print('Signed up user: $userId');
+        userId = await widget.auth.signIn(_email, _password);
+        print('Signin done\n\nProceeding with GR:' +
+            _gr +
+            ' and email ' +
+            _email);
+        writeGR(_email, _gr).then((value) {
+          if (value) {
+            print('email written to collection successfully!');
+          } else {
+            print('Couldn\'t write to collection! :(');
+          }
         });
 
-        if (userId.length > 0 && userId != null && _isLoginForm) {
-          widget.loginCallback();
-        } else if (userId.length > 0 && userId != null && !_isLoginForm) {
-          // widget
-          widget.signupCallback();
-        }
-      } catch (e) {
-        // showDialog(
-        //   barrierDismissible: true,
-        //   context: context,
-        //   child: AlertDialog(
-        //     title: Text('Error'),
-        //     content: Text(e.message),
-        //     actions: <Widget>[
-        //       FlatButton(
-        //           onPressed: () {
-        //             print('Dialog dismissed');
-        //             Navigator.of(context).pop();
-        //           },
-        //           child: Text('Got it'))
-        //     ],
-        //   ),
-        // );
-        print('Error: $e');
-        setState(() {
-          _isLoading = false;
-          _errorMessage = e.message;
-          _formKey.currentState.reset();
-        });
+        //widget.auth.sendEmailVerification();
+        //_showVerifyEmailSentDialog();
       }
+      print('HOLY SHIT! Double Bam!');
+      if (userId.length > 0 && userId != null && _isLoginForm) {
+        widget.loginCallback();
+      }
+      if (userId.length > 0 && userId != null && !_isLoginForm) {
+        widget.signupCallback();
+      }
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error: $e');
+      setState(() {
+        _isLoading = false;
+        _errorMessage = e.toString();
+        _formKey.currentState.reset();
+      });
     }
+    // }
   }
 
-  Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
+  // Future<String> get _localPath async {
+  //   final directory = await getApplicationDocumentsDirectory();
+  //   return directory.path;
+  // }
 
-  Future<File> _localFile(String filename) async {
-    final path = await _localPath;
-    return File('$path/$filename.txt');
-  }
+  // Future<File> _localFile(String filename) async {
+  //   final path = await _localPath;
+  //   return File('$path/$filename.txt');
+  // }
 
-  Future<File> writeGR(String email, String gr) async {
-    final file = await _localFile(email);
-    print('Writing now babe');
-    return file.writeAsString('$gr#false');
-    // mentions that the file named 'abc@abc.com.txt' has the contents '9999#false'
-    // once the signup process is done, #false will either change to #true
-    // or it will change to empty string (to be decided later)
-  }
-
-  @override
-  void initState() {
-    _errorMessage = "";
-    _isLoading = false;
-    _isLoginForm = true;
-    super.initState();
+  Future<bool> writeGR(String email, String gr) async {
+    bool canWrite = false;
+    ref
+        .collection('email_gr_maps')
+        .document(email)
+        .get()
+        .then((DocumentSnapshot data) {
+      if (data.exists) {
+        print('Sorry dude..data exists');
+        canWrite = false;
+      } else {
+        print(
+            'No data exists=> writing to email_gr_maps($email->$gr,\'false\')');
+        ref.collection('email_gr_maps').document(email).setData({
+          'gr': gr,
+          'status': false,
+        });
+        canWrite = true;
+      }
+    });
+    return canWrite;
   }
 
   void resetForm() {
@@ -210,8 +206,20 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
 
   Widget _showForm() {
     return new Container(
-      padding: EdgeInsets.all(16.0),
-      color: Colors.lightBlue[50],
+      padding: EdgeInsets.only(left: 16.0, right: 16),
+      // margin: EdgeInsets.only(bottom: 30),
+      // color: Colors.lightBlue[50],
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.lightBlue[100],
+            Colors.blue[100],
+            Colors.orange[100],
+            Colors.red[200],
+          ],
+          // begin: Alignment.bottomLeft
+        ),
+      ),
       child: new Form(
         key: _formKey,
         child: new ListView(
@@ -225,6 +233,9 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
             showPrimaryButton(),
             showSecondaryButton(),
             showErrorMessage(),
+            SizedBox(
+              height: 30,
+            )
           ],
         ),
       ),
@@ -232,7 +243,7 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
   }
 
   Widget showErrorMessage() {
-    if (_errorMessage.length > 0 && _errorMessage != null) {
+    if (_errorMessage != null) {
       return new Text(
         _errorMessage,
         style: TextStyle(
@@ -365,7 +376,7 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
             enabledBorder: InputBorder.none,
             disabledBorder: InputBorder.none),
         validator: (value) => value.isEmpty ? 'Password can\'t be empty' : null,
-        onSaved: (value) => _gr = value.trim(),
+        onChanged: (value) => _gr = value.trim(),
       ),
     );
   }
@@ -406,15 +417,17 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
 
   Widget showSecondaryButton() {
     return Container(
-      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-      child: new FlatButton(
-        color: Colors.orange[100],
+      padding: EdgeInsets.fromLTRB(30, 0, 30, 0),
+      child: new RaisedButton(
+        color: Colors.amber[100],
         highlightColor: Colors.purple[200],
+        elevation: 8,
         child: new Text(
           _isLoginForm ? 'Create an account' : 'Have an account? Sign in',
           style: new TextStyle(
             fontSize: 18.0,
             fontWeight: FontWeight.w400,
+            // color: Colors.white
           ),
         ),
         onPressed: toggleFormMode,
@@ -427,7 +440,23 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
     var doc = ref.collection('gr_email_maps').document(justGR);
     var data = await doc.get();
     tempEmail = data['email'];
-    print(tempEmail);
+    print('Got it son! =>' + tempEmail);
     return tempEmail;
+    // }
+
+    // return tempEmail;
+    // });
+    // tempEmail = data.documents[0].documentID;
+    // print(
+    //   'grower ${data.documents[0]['name']}',
+    // );
+    // });
+    // var doc = await ref
+    //     .collection('email_gr_maps')
+    //     .where('gr', isEqualTo: justGR)
+    //     .getDocuments().;
+    // var data = await doc.get();
+    // tempEmail = data['email'];
+    // print(tempEmail);
   }
 }
