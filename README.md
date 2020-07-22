@@ -1,7 +1,26 @@
-# App_Students
+# KESBV: Student's App
 
-A new Flutter project.
+An android app built for students of KES' Bhagavati Vidyalaya. Provides comprehensive solution for accessing assignments/resources, joining online lectures and keeping track of notices raised by school management.
+Built in Flutter and using Cloud Firestore
 
+Supported features:
+- [x] Unified login signup with FirebaseAuth
+- [x] View and access resources added by teachers
+- [x] View notices
+- [x] Join lectures based on day of week
+- [x] Messaging feature for app feedback to Developer
+
+Upcoming features:
+- [ ] Attendance tracking for online lectures
+- [ ] Push notifications for new announcements
+
+## Want to test for yourself?
+```
+1. Clone the repo
+2. Generate google-services.json from your Firebase project
+3. Paste it in android/app/
+4. Run your app with flutter run
+```
 ## Getting Started
 
 This project is a starting point for a Flutter application.
