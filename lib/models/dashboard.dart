@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:App_Students/models/assignments.dart';
 import 'package:App_Students/models/chatforum.dart';
 import 'package:App_Students/models/dev.dart';
-import 'package:App_Students/models/mocklectures.dart';
+import 'package:App_Students/models/livelectures.dart';
 import 'package:App_Students/models/notices.dart';
 
 class Dashboard extends StatefulWidget {
@@ -39,6 +39,8 @@ class _DashboardState extends State<Dashboard> {
   String username = "";
   bool isProfileComplete = false;
   bool isLoading = false;
+  // bool isTapped = false;
+  int x = 0;
   List dataKeys = [
     'fname',
     'mname',
@@ -67,6 +69,7 @@ class _DashboardState extends State<Dashboard> {
     });
     // Begin CPI
     fetchData(uid);
+    x = 0;
     super.initState();
   }
 
@@ -107,7 +110,9 @@ class _DashboardState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.amber[50],
       appBar: AppBar(
+        // leading: Icon(Icons.dashboard),
         title: Text(
           'Student Dashboard',
           style: TextStyle(fontFamily: 'Metropolis'),
@@ -156,7 +161,7 @@ class _DashboardState extends State<Dashboard> {
                   'Student\'s App, KESBV',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: MediaQuery.of(context).textScaleFactor*25,
+                    fontSize: MediaQuery.of(context).textScaleFactor * 25,
                     fontFamily: 'Metropolis',
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
@@ -230,18 +235,23 @@ class _DashboardState extends State<Dashboard> {
           Container(
             margin: EdgeInsets.all(8),
             decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.lightBlue[200],
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.blue[900],
-                      blurRadius: 3,
-                      offset: Offset(2, 3)),
-                ]),
+              borderRadius: BorderRadius.circular(20),
+              color: Colors.lightBlue[200],
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.blue[900],
+                  blurRadius: 3,
+                  offset: Offset(2, 3),
+                ),
+              ],
+            ),
             child: ListTile(
               title: Text(
                 'Your Profile',
-                style: TextStyle(fontSize: 18, fontFamily: 'Metropolis'),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontFamily: 'Metropolis',
+                ),
               ),
               enabled: isProfileComplete,
               subtitle: Text(
@@ -272,10 +282,10 @@ class _DashboardState extends State<Dashboard> {
 
   Widget showDashboard() {
     return SingleChildScrollView(
-      child: Container(
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 1000),
         // margin: EdgeInsets.fromLTRB(25, 5, 25, 5),
         // height: MediaQuery.of(context).size.height,
-        decoration: BoxDecoration(color: Colors.grey[100]),
         child: Column(
           children: <Widget>[
             SizedBox(height: 25),
@@ -394,22 +404,20 @@ class _DashboardState extends State<Dashboard> {
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'Metropolis',
-            fontSize: MediaQuery.of(context).textScaleFactor *22,
+            fontSize: MediaQuery.of(context).textScaleFactor * 22,
             fontWeight: FontWeight.bold,
             color: isProfileComplete ? Colors.black : Colors.grey,
           ),
         ),
         leading: Image.asset(
           allAssets[0],
-          // height: 20,
-          // width: 20,
         ),
         onTap: () {
           print('See all assignments please');
           Navigator.push(
             context,
             new MaterialPageRoute(
-              builder: (context) => pages[0],
+              builder: (context) => Assgn(),
             ),
           );
         },
@@ -419,12 +427,13 @@ class _DashboardState extends State<Dashboard> {
 
   Widget rowTwo() {
     return Container(
+      // duration: Duration(milliseconds: 1000),
       height: 80,
       alignment: Alignment.center,
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(25),
           gradient: LinearGradient(
-            colors: allGrads[1],
+            colors: allGrads[(x + 1) % 5],
           ),
           boxShadow: [myShadow]),
       width: MediaQuery.of(context).size.width * 0.85,
@@ -436,22 +445,20 @@ class _DashboardState extends State<Dashboard> {
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'Metropolis',
-            fontSize: MediaQuery.of(context).textScaleFactor *22,
+            fontSize: MediaQuery.of(context).textScaleFactor * 22,
             fontWeight: FontWeight.bold,
             color: isProfileComplete ? Colors.black : Colors.grey,
           ),
         ),
         leading: Image.asset(
           allAssets[1],
-          // height: 20,
-          // width: 20,
         ),
         onTap: () {
-          print('See all assignments please');
+          print('See all notices!');
           Navigator.push(
             context,
             new MaterialPageRoute(
-              builder: (context) => pages[1],
+              builder: (context) => Notices(),
             ),
           );
         },
@@ -478,22 +485,22 @@ class _DashboardState extends State<Dashboard> {
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'Metropolis',
-            fontSize: MediaQuery.of(context).textScaleFactor *22,
+            fontSize: MediaQuery.of(context).textScaleFactor * 22,
             fontWeight: FontWeight.bold,
             color: isProfileComplete ? Colors.black : Colors.grey,
           ),
         ),
         leading: Image.asset(
           allAssets[2],
-          // height: 20,
-          // width: 20,
         ),
         onTap: () {
-          print('See all assignments please');
+          print('See all lecture schedules please');
           Navigator.push(
             context,
             new MaterialPageRoute(
-              builder: (context) => pages[2],
+              builder: (context) => Lectures(
+                std: snap['standard'],
+              ),
             ),
           );
         },
@@ -520,22 +527,20 @@ class _DashboardState extends State<Dashboard> {
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'Metropolis',
-            fontSize: MediaQuery.of(context).textScaleFactor *22,
+            fontSize: MediaQuery.of(context).textScaleFactor * 22,
             fontWeight: FontWeight.bold,
             color: isProfileComplete ? Colors.black : Colors.grey,
           ),
         ),
         leading: Image.asset(
           allAssets[3],
-          // height: 20,
-          // width: 20,
         ),
         onTap: () {
-          print('See all assignments please');
+          print('Show Dev page please');
           Navigator.push(
             context,
             new MaterialPageRoute(
-              builder: (context) => pages[3],
+              builder: (context) => Developer(),
             ),
           );
         },
@@ -562,22 +567,20 @@ class _DashboardState extends State<Dashboard> {
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'Metropolis',
-            fontSize: MediaQuery.of(context).textScaleFactor *22,
+            fontSize: MediaQuery.of(context).textScaleFactor * 22,
             fontWeight: FontWeight.bold,
             color: isProfileComplete ? Colors.black : Colors.grey,
           ),
         ),
         leading: Image.asset(
           allAssets[4],
-          // height: 20,
-          // width: 20,
         ),
         onTap: () {
-          print('See all assignments please');
+          print('Open Chat Forum  please');
           Navigator.push(
             context,
             new MaterialPageRoute(
-              builder: (context) => pages[4],
+              builder: (context) => ChatForum(),
             ),
           );
         },
@@ -595,8 +598,8 @@ class _DashboardState extends State<Dashboard> {
 
   List allGrads = [
     [Colors.amber[100], Colors.amber[400]],
-    [Colors.pink[100], Colors.pink[400]],
-    [Colors.teal[100], Colors.teal[400]],
+    [Colors.cyan[100], Colors.cyan[400]],
+    [Colors.orange[100], Colors.orange[400]],
     [Colors.blueAccent[100], Colors.blueAccent[400]],
     [Colors.amber[100], Colors.amber[400]]
   ];
@@ -619,7 +622,7 @@ class _DashboardState extends State<Dashboard> {
 
   int myStandard = 99;
 
-  List pages = [Assgn(), Notices(), Lectures(), Developer(), ChatForum()];
+  // List pages = [Assgn(), Notices(), Lectures(), Developer(), ChatForum()];
 
   var myRadiusSet = BorderRadius.only(
     topLeft: Radius.circular(40),

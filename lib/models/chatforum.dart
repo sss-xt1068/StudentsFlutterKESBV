@@ -66,6 +66,11 @@ class _ChatForumState extends State<ChatForum> {
       body: Stack(
         children: <Widget>[
           showApp(),
+          Positioned(
+            bottom: 2,
+            left: 2,
+            child: showMessageBar(),
+          ),
           showCircularProgress(),
         ],
       ),
@@ -206,5 +211,25 @@ class _ChatForumState extends State<ChatForum> {
       // _curMessages =
       // print(snapshot.value.values.toString());
     });
+  }
+
+  Widget showMessageBar() {
+    return TextField(
+      textCapitalization: TextCapitalization.sentences,
+      // controller: messageController,
+      textAlign: TextAlign.left,
+      decoration: InputDecoration(
+        fillColor: Colors.blue,
+        hintText: 'Type a message',
+        focusedBorder: InputBorder.none,
+        enabledBorder: InputBorder.none,
+      ),
+      onChanged: (val) {
+        _message = val.trim();
+      },
+      onEditingComplete: () {
+        print('Wanna send => ' + _message);
+      },
+    );
   }
 }

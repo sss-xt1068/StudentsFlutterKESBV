@@ -14,6 +14,7 @@ class _DeveloperState extends State<Developer> {
       fontSize: 20,
       fontFamily: 'Metropolis',
       fontWeight: FontWeight.bold,
+      color: Colors.black87,
     ),
     TextStyle(
       fontSize: 14,
@@ -21,12 +22,24 @@ class _DeveloperState extends State<Developer> {
       // fontWeight: FontWeight.bold,
     )
   ];
+  bool tapped = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Know the developer'),
+        title: Text('About the App'),
+        backgroundColor: Colors.blue[800],
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.touch_app),
+            onPressed: () {
+              setState(() {
+                tapped = !tapped;
+              });
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         child: Container(
@@ -35,7 +48,7 @@ class _DeveloperState extends State<Developer> {
           alignment: Alignment.center,
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.amber[400], Colors.blue[200]],
+              colors: [Colors.teal[400], Colors.blue[200]],
             ),
           ),
           child: Column(
@@ -56,22 +69,40 @@ class _DeveloperState extends State<Developer> {
               SizedBox(
                 height: 30,
               ),
-              FlutterLogo(
-                size: 100,
-                colors: Colors.blue,
-              ),
-              SizedBox(height: 70),
               GestureDetector(
-                child: Container(
+                  child: AnimatedContainer(
+                    height: tapped ? 200 : 100,
+                    width: tapped ? 200 : 100,
+                    duration: Duration(milliseconds: 600),
+                    child: FlutterLogo(
+                      colors: tapped ? Colors.red : Colors.deepPurple,
+                    ),
+                    curve: Curves.elasticOut,
+                  ),
+                  onDoubleTap: () {
+                    setState(() {
+                      tapped = !tapped;
+                    });
+                  }),
+              SizedBox(height: 40),
+              GestureDetector(
+                child: AnimatedContainer(
+                  duration: Duration(milliseconds: 750),
                   padding: EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.blue[50],
+                    color: tapped ? Colors.blueGrey : Colors.blue[50],
                     borderRadius: BorderRadius.circular(25),
                   ),
                   child: Text(
                     'Something you didn\'t like?\nWant to message the developer?',
                     textAlign: TextAlign.center,
-                    style: devstyles[1],
+                    style: tapped
+                        ? TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontFamily: 'Metropolis',
+                          )
+                        : devstyles[1],
                   ),
                 ),
                 onTap: () {
@@ -141,7 +172,26 @@ class _DeveloperState extends State<Developer> {
             style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic),
           ),
         ),
-        onTap: open,
+        onTap: () {
+          showDialog(
+            context: context,
+            child: AlertDialog(
+              title: Text('Visit icons8.com ?'),
+              actions: <Widget>[
+                FlatButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('No'),
+                ),
+                FlatButton(
+                  onPressed: open,
+                  child: Text('Yes'),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

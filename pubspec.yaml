@@ -33,6 +33,8 @@ dependencies:
   cloud_firestore:
   path_provider:
   url_launcher:
+  firebase_messaging:
+
 
   
 dev_dependencies:

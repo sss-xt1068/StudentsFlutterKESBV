@@ -588,7 +588,7 @@ class _NewUserState extends State<NewUser> {
                   'mname': _mname,
                   'lname': _lname,
                   'dob': _dob.toString().substring(0, 10),
-                  'contact': 9876543210,
+                  'contact': _contact,
                   'gender': _gender == 'M' ? 'Male' : 'Female',
                   'email': uemail,
                   'grnumber': _gr,

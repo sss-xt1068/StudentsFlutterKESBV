@@ -19,6 +19,7 @@ class _AssgnState extends State<Assgn> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Assignments/ Resources'),
+        backgroundColor: Colors.amber[800],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
